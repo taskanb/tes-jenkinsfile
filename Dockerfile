@@ -1,26 +1,15 @@
-FROM ubuntu:14.04
+RUN apt-get install -y software-properties-common python-software-properties
+RUN add-apt-repository -y ppa:jonathonf/texlive-2016
+RUN apt-get update
 
-# install latex packages
-RUN apt-get update -y \
-  && apt-get install -y -o Acquire::Retries=10 --no-install-recommends \
-    texlive-latex-base \
-    texlive-xetex latex-xcolor \
-    texlive-math-extra \
-    texlive-latex-extra \
-    texlive-fonts-extra \
-    texlive-bibtex-extra \
-    fontconfig \
-    lmodern
+RUN apt-get -yq update && apt-get install -y python-pip wget librsvg2-bin
 
-# will ease up the update process
-# updating this env variable will trigger the automatic build of the Docker image
-ENV PANDOC_VERSION "1.19.2.1"
-
-# install pandoc
-RUN cabal update && cabal install pandoc-${PANDOC_VERSION}
-
-WORKDIR /source
-
-ENTRYPOINT ["/root/.cabal/bin/pandoc"]
+RUN wget https://github.com/jgm/pandoc/releases/download/2.1/pandoc-2.1-1-amd64.deb && \
+    dpkg -i pandoc-2.1-1-amd64.deb && \
+    wget https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.0.1/linux-ghc80-pandoc20.tar.gz -q -O - | tar xz && \
+    mv pandoc-crossref /usr/bin/ && \
+    pip install pandocfilters && \
+    apt-get clean -y && \
+    rm -rf pandoc-2.1-1-amd64.deb /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 CMD ["--help"]
