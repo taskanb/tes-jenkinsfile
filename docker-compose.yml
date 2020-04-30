@@ -1,0 +1,26 @@
+version: '2.2'
+
+networks:
+    jenkins:
+        driver: bridge
+        
+volumes:
+    jenkins-data: {}
+    jenkins-docker-certs: {}
+    
+services:
+    docker: dind
+    jenkins:
+        image: jenkins/jenkins:lts
+        restart: unless-stopped
+        ports:
+        - "8080"
+        - "50000"
+        container_name: rnrejenkins
+        volumes:
+            - jenkins-docker-certs:/certs/client
+            - jenkins-data:/var/jenkins_home
+        networks:
+            - jenkins
+            aliases:
+                docker
